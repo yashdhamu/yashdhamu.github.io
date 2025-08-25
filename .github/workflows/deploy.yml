@@ -1,3 +1,4 @@
+# .github/workflows/deploy.yml
 name: Deploy Gatsby to GitHub Pages
 
 on:
@@ -24,18 +25,17 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          # use your project's Node version if you have one in .nvmrc, otherwise LTS
-          node-version: '20'
+          node-version: '20'   # required by glob@11 and friends
+
+      - name: Enable Corepack (Yarn)
+        run: corepack enable
 
       - name: Install deps
-        run: |
-          corepack enable
-          yarn install --frozen-lockfile || yarn install
+        run: yarn install --frozen-lockfile || yarn install
 
       - name: Build Gatsby
         env:
-          # If you have a custom domain, set GATSBY_SITE_URL accordingly
-          NODE_ENV: production
+          NODE_OPTIONS: --openssl-legacy-provider
         run: yarn build
 
       - name: Upload artifact
