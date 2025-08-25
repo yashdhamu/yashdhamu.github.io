@@ -1,0 +1,55 @@
+name: Deploy Gatsby to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          # use your project's Node version if you have one in .nvmrc, otherwise LTS
+          node-version: '20'
+
+      - name: Install deps
+        run: |
+          corepack enable
+          yarn install --frozen-lockfile || yarn install
+
+      - name: Build Gatsby
+        env:
+          # If you have a custom domain, set GATSBY_SITE_URL accordingly
+          NODE_ENV: production
+        run: yarn build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
