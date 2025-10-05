@@ -9,3 +9,7 @@ package-lock.json
 .DS_Store
 
 .vscode/
+node_modules/
+.idea/
+__pycache__/
+*.log
